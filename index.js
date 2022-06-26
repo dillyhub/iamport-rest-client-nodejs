@@ -1,2 +1,1 @@
-
-module.exports = require('./lib/iamport');
+module.exports = require('./lib/Iamport');

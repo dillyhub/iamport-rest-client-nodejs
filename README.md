@@ -1,92 +1,90 @@
-# Iamport
-[![Build Status](https://travis-ci.org/iamport/iamport-rest-client-nodejs.svg?branch=master)](https://travis-ci.org/iamport/iamport-rest-client-nodejs)
-[![npm version](https://badge.fury.io/js/iamport.svg)](https://badge.fury.io/js/iamport)
-[![Dependency Status](https://david-dm.org/iamport/iamport-rest-client-nodejs.svg)](https://david-dm.org/iamport/iamport-rest-client-nodejs)
+# iamport-rest-client-nodejs
+[ ![alt text](https://img.shields.io/badge/axios-v0.19.0-orange.svg?longCache=true&style=flat-square) ](https://github.com/axios/axios)
+[ ![alt text](https://img.shields.io/badge/lodash-v4.17.15-yellow.svg?longCache=true&style=flat-square) ](https://github.com/lodash/lodash)
+[ ![alt text](https://img.shields.io/badge/qs-v6.9.0-green.svg?longCache=true&style=flat-square) ](https://github.com/ljharb/qs)
 
-아임포트는 특정 서비스와 국내 PG사와의 연동을 간편하게 연결해주는 서비스입니다.
-- 이 모듈은 아임포트에서 제공하는 REST API를 [Node.js®](https://nodejs.org/)로 구현한 샘플프로그램입니다.
-- 일부 또는 최신 REST-API는 해당 프로그램에 구현되어 있지 않으므로 참조용으로만 쓰는 것을 권장합니다.
-- 아임포트의 자세한 내용은 [여기](http://iamport.kr/)를 참고하시기 바랍니다.
+NodeJS용 아임포트 REST API Client 입니다.
 
-## Features
-- 모든 함수는 [Promise](http://www.html5rocks.com/ko/tutorials/es6/promises/)를 반환
+## 버전정보
+최신 버전은 [v0.9.11](https://github.com/iamport/rest-client-nodejs/tree/v0.9.11)입니다.
 
-## Requirements
-- [nodejs](https://github.com/nodejs/node) >= 0.12.x
+## 설치하기
+아래 명령어를 통해 `iamport-rest-client-nodejs`를 귀하의 nodeJS 프로젝트에 추가합니다.
 
-## Installation
 ```
-$ npm install --save iamport
+$ npm install iamport-rest-client-nodejs
 ```
 
-## Usage
+## API 호출하기
+아래는 `iamport-rest-client-nodejs`를 활용해 은행 정보 조회 API를 호출하는 예제 코드입니다. 
+
 ```javascript
-var Iamport = require('iamport');
-var iamport = new Iamport({
-  impKey: 'your API key',
-  impSecret: 'your API Secret key'
+// 1. 아임포트 REST API 호출에 필요한 모듈을 불러옵니다.
+import { Iamport, Request, Enum } from 'iamport-rest-client-nodejs';
+const { Banks } = Request;
+const { BankCodeEnum } = Enum;
+
+// 2. 아임포트 객체를 생성합니다. 귀하의 API 정보는 아임포트 관리자페이지 > 시스템설정 > 내정보를 참고해주세요.
+const iamport = new Iamport({
+  apiKey: '귀하의_REST_API_KEY를_입력해주세요', 
+  apiSecret: '귀하의_REST_API_SECRET_KEY를_입력해주세요',
 });
 
-// 아임포트 고유 아이디로 결제 정보를 조회
-iamport.payment.getByImpUid({
-  imp_uid: 'your imp_uid'  
-}).then(function(result){
-  // To do
-}).catch(function(error){
-  // handle error
+// EX1. 모든 은행 정보를 조회합니다.
+const getBanks = Banks.getBanks();
+getBanks.request(iamport)
+.then(response => console.log('response: ', response.data))
+.catch(error => console.log('error: ', error.response.data));
+
+// EX2. 특정 은행 정보를 조회합니다.
+const getBank = Banks.getBank({
+  code: BankCodeEnum.SC,
 });
-
-// 상점 고유 아이디로 결제 정보를 조회
-iamport.payment.getByMerchant({
-  merchant_uid: 'your merchant_uid'  
-})
-
-// 상태별 결제 정보 조회
-iamport.payment.getByStatus({
-  payment_status: 'your payment_status'  
-})
+await getBank.request(iamport)
+.then(response => console.log('response: ', response.data))
+.catch(error => console.log('error: ', error.response.data));
 
 ```
 
-## Available resources & methods
-*Where you see `params` it is a plain JavaScript object*
-- certification
- * [`get(params)`](https://api.iamport.kr/#!/certifications/getCertification)
- * [`delete(params)`](https://api.iamport.kr/#!/certifications/deleteCertification)
-- payment
- * [`getByImpUid(params)`](https://api.iamport.kr/#!/payments/getPaymentByImpUid)
- * [`getByMerchant(params)`](https://api.iamport.kr/#!/payments/getPaymentByMerchantUid)
- * [`getByStatus(params)`](https://api.iamport.kr/#!/payments/getPaymentsByStatus)
- * [`cancel(params)`](https://api.iamport.kr/#!/payments/cancelPayment)
- * [`prepare(params)`](https://api.iamport.kr/#!/payments.validation/preparePayment)
- * [`getPrepare(params)`](https://api.iamport.kr/#!/payments.validation/getPaymentPrepareByMerchantUid)
-- subscribe
- * [`onetime(params)`](https://api.iamport.kr/#!/subscribe/payments/onetime)
- * [`again(params)`](https://api.iamport.kr/#!/subscribe/payments/again)
- * [`schedule(params)`](https://api.iamport.kr/#!/subscribe/payments/schedule)
- * [`unschedule(params)`](https://api.iamport.kr/#!/subscribe/payments/unschedule)
-- subscribe_customer
- * [`get(params)`](https://api.iamport.kr/#!/subscribe.customer/customer_view)
- * [`create(params)`](https://api.iamport.kr/#!/subscribe.customer/customer_save)
- * [`delete(params)`](https://api.iamport.kr/#!/subscribe.customer/customer_delete)
-- vbank
- * [`create(params)`](https://api.iamport.kr/#!/vbanks)
- * [`getHolder(params)`](https://api.iamport.kr/#!/vbanks/queryBankHolder)
- - escrows
- * [`create(params)`](https://api.iamport.kr/#!/escrow.logis/escrow_logis_save)
 
-## Contribution
-- 이 프로젝트는 누구나 참여 가능합니다.
-- 버그나 개선점 및 의견 등은 [이슈](https://github.com/iamport/iamport-rest-client-nodejs/issues) 및 [Pull Request](https://github.com/iamport/iamport-rest-client-nodejs/compare)를 활용해주세요.
+## 테스트하기
+프로젝트를 클론 받은 후 필요한 모듈을 설치합니다. yan example 명령어를 통해 테스트할 타깃, `REST API 키` 그리고 `REST API SECRET 키`를 입력합니다.
 
-## Conventions
-- [ES5](https://github.com/airbnb/javascript/tree/master/es5)
-- [ES6](https://github.com/airbnb/javascript)
+```
+$ git clone https://github.com/SoleeChoi/iamport-rest-client-nodejs.git
+$ cd ./iamport-rest-client-nodejs
+$ npm install
+$ yarn example [테스트 타깃] [apiKey] [apiSecret]
+```
 
-## Links
-- I'amport; 공식 사이트: http://www.iamport.kr/
-- I'amport; API(swagger): https://api.iamport.kr/
-- I'amport; 메뉴얼: http://www.iamport.kr/manual/
+테스트 타깃의 종류는 아래와 같습니다.
 
-## License
-- [MIT](https://github.com/iamport/iamport-rest-client-nodejs/blob/master/LICENSE)
+| 타깃            | 내용                        |
+| -------------- | -------------------------- |
+| authenticate   | 사용자 인증 테스트              |
+| payments       | 일반결제 테스트                |
+| prepare        | 결제 예정 금액 등록 및 조회 테스트 |
+| escrows        | 에스크로 결제 테스트            |
+| vbanks         | 가상계좌 테스트                |
+| subscribe      | 정기결제 테스트                |
+| customers      | 빌링키 테스트                 |
+| payco          | 페이코 테스트                 |
+| kakao          | 카카오페이 테스트              |
+| naverco        | 네이버페이 주문형 테스트         |
+| naverpay       | 네이버페이 결제형 테스트         |
+| receipts       | 현금영수증 테스트              |
+| external       | 현금결제 영수증 테스트          |
+| certifications | 휴대폰 본인인증 테스트          |
+| cards          | 금융결제원 카드사 코드 테스트     |
+| banks          | 금융결제원 은행 코드 테스트      |
+| enum           | ENUM 테스트                 |
+
+`REST API 키`와 `REST API SECRET 키`는 아임포트 관리자페이지 > 시스템 설정 > 내정보에서 확인하실 수 있습니다. 자세한 정보는 [가맹점 정보 확인하기](https://docs.iamport.kr/implementation/account-info)를 참고해주세요.
+미입력시 아임포트 테스트용 `REST API 키`와 `REST API SECRET 키`로 테스트가 진행됩니다.
+
+테스트 예시는 아래와 같습니다.
+
+```
+$ npm install
+$ yarn example payments imp_apikey ekKoeW8RyKuT0zgaZsUtXXTLQ4AhPFW3ZGseDA6bkA5lamv9OqDMnxyeB9wqOsuO9W3Mx9YSJ4dTqJ3f
+```
